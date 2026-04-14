@@ -1,0 +1,529 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🐍 Snake & Ladder</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
+
+        :root {
+            --wood: #8B4513;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: linear-gradient(135deg, #2c1810, #5d4037);
+            font-family: 'Press Start 2P', system-ui;
+            color: #fff;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 900px;
+            width: 100%;
+            text-align: center;
+        }
+
+        h1 {
+            font-size: 2.8rem;
+            margin-bottom: 20px;
+            text-shadow: 0 0 20px #ffeb3b;
+            letter-spacing: 4px;
+        }
+
+        .game-wrapper {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 25px;
+        }
+
+        .board-container {
+            position: relative;
+            width: 620px;
+            height: 620px;
+            padding: 10px;
+            background: #3e2723;
+            border-radius: 20px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.6),
+                        inset 0 0 30px rgba(255, 235, 59, 0.3);
+        }
+
+        #board {
+            width: 600px;
+            height: 600px;
+            display: grid;
+            grid-template-columns: repeat(10, 1fr);
+            background: #f5e8c7;
+            border: 8px solid var(--wood);
+            border-radius: 12px;
+            overflow: hidden;
+            position: relative;
+            box-shadow: inset 0 0 25px rgba(0, 0, 0, 0.4);
+        }
+
+        .square {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            font-weight: bold;
+            color: #3e2723;
+            position: relative;
+            border: 1px solid rgba(139, 69, 19, 0.3);
+            transition: all 0.2s;
+        }
+
+        .square .number {
+            z-index: 2;
+        }
+
+        .square .icon {
+            position: absolute;
+            top: 4px;
+            right: 4px;
+            font-size: 22px;
+            z-index: 3;
+            filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3));
+        }
+
+        /* Checkered board */
+        .square:nth-child(odd) { background: #f5e8c7; }
+        .square:nth-child(even) { background: #d4b88a; }
+
+        .token {
+            position: absolute;
+            width: 42px;
+            height: 42px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 28px;
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.5),
+                        0 0 0 6px rgba(255,255,255,0.3);
+            transition: left 0.7s cubic-bezier(0.68, -0.55, 0.27, 1.55),
+                        top 0.7s cubic-bezier(0.68, -0.55, 0.27, 1.55);
+            z-index: 20;
+            user-select: none;
+        }
+
+        .info-panel {
+            width: 620px;
+            background: rgba(0, 0, 0, 0.7);
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .player-info {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 1.1rem;
+        }
+
+        .player-info span {
+            font-size: 2rem;
+        }
+
+        .dice-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 12px;
+        }
+
+        #dice {
+            width: 80px;
+            height: 80px;
+            background: #fff;
+            color: #3e2723;
+            font-size: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 15px;
+            box-shadow: 0 8px 15px rgba(0, 0, 0, 0.4),
+                        inset 0 0 20px rgba(0, 0, 0, 0.2);
+            transition: transform 0.3s;
+        }
+
+        button {
+            font-family: 'Press Start 2P', system-ui;
+            padding: 15px 35px;
+            font-size: 1.2rem;
+            background: #ffeb3b;
+            color: #3e2723;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            box-shadow: 0 8px 0 #c9b32a;
+            transition: all 0.2s;
+        }
+
+        button:active {
+            transform: translateY(4px);
+            box-shadow: 0 4px 0 #c9b32a;
+        }
+
+        button:disabled {
+            background: #666;
+            color: #aaa;
+            cursor: not-allowed;
+            box-shadow: none;
+        }
+
+        #message {
+            min-height: 60px;
+            font-size: 1.4rem;
+            margin: 10px 0;
+        }
+
+        .legend {
+            margin-top: 15px;
+            font-size: 0.9rem;
+            background: rgba(255,255,255,0.1);
+            padding: 15px;
+            border-radius: 10px;
+            text-align: left;
+        }
+
+        .legend h3 {
+            margin-bottom: 8px;
+            color: #ffeb3b;
+        }
+
+        .legend ul {
+            list-style: none;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 6px;
+        }
+
+        .legend li {
+            font-size: 0.85rem;
+        }
+
+        .footer {
+            margin-top: 20px;
+            font-size: 0.9rem;
+            opacity: 0.8;
+        }
+
+        @media (max-width: 700px) {
+            .board-container, .info-panel {
+                width: 100%;
+                max-width: 100%;
+            }
+            #board {
+                width: 100%;
+                height: auto;
+                aspect-ratio: 1 / 1;
+            }
+            h1 { font-size: 2.2rem; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🐍 SNAKE &amp; LADDER 🪜</h1>
+        
+        <div class="game-wrapper">
+            <!-- Board -->
+            <div class="board-container">
+                <div id="board"></div>
+            </div>
+
+            <!-- Controls -->
+            <div class="info-panel">
+                <!-- Player 1 -->
+                <div class="player-info">
+                    <span id="p1-emoji">🔴</span>
+                    <div>
+                        <strong>PLAYER 1</strong><br>
+                        Position: <span id="p1-pos" style="color:#e74c3c; font-size:1.4rem;">0</span>
+                    </div>
+                </div>
+
+                <!-- Dice -->
+                <div class="dice-container">
+                    <div id="dice">⚀</div>
+                    <button id="roll-btn">ROLL DICE</button>
+                    <div id="current-turn" style="margin-top:8px; font-size:1.1rem;">CURRENT TURN: <span id="turn-name">PLAYER 1</span> 🔴</div>
+                </div>
+
+                <!-- Player 2 -->
+                <div class="player-info">
+                    <span id="p2-emoji">🔵</span>
+                    <div>
+                        <strong>PLAYER 2</strong><br>
+                        Position: <span id="p2-pos" style="color:#3498db; font-size:1.4rem;">0</span>
+                    </div>
+                </div>
+
+                <div id="message"></div>
+
+                <button id="reset-btn" style="background:#e74c3c; color:white; box-shadow:0 8px 0 #c0392b;">NEW GAME</button>
+            </div>
+
+            <!-- Legend -->
+            <div class="legend">
+                <h3>SNAKES &amp; LADDERS</h3>
+                <ul>
+                    <li><strong style="color:#2ecc71">LADDERS ↑</strong></li>
+                    <li>4→14 9→31 21→42 28→84 51→67 72→91 80→100</li>
+                    <li><strong style="color:#e74c3c">SNAKES ↓</strong></li>
+                    <li>17→7 54→34 62→19 64→60 87→24 93→73 95→75 98→78 99→81</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="footer">
+            Made with ❤️ for GitHub • Open source • Just open index.html and play!
+        </div>
+    </div>
+
+    <script>
+        // ==================== GAME DATA ====================
+        const snakesAndLadders = {
+            // Ladders (climb up)
+            4: 14, 9: 31, 21: 42, 28: 84,
+            51: 67, 72: 91, 80: 100,
+            // Snakes (slide down)
+            17: 7, 54: 34, 62: 19, 64: 60,
+            87: 24, 93: 73, 95: 75, 98: 78, 99: 81
+        };
+
+        const diceFaces = ['⚀', '⚁', '⚂', '⚃', '⚄', '⚅'];
+
+        let players = [
+            { id: 1, name: 'PLAYER 1', emoji: '🔴', color: '#e74c3c', position: 0 },
+            { id: 2, name: 'PLAYER 2', emoji: '🔵', color: '#3498db', position: 0 }
+        ];
+
+        let currentPlayerIndex = 0;
+        let isGameOver = false;
+
+        // ==================== DOM ELEMENTS ====================
+        const boardEl = document.getElementById('board');
+        const rollBtn = document.getElementById('roll-btn');
+        const resetBtn = document.getElementById('reset-btn');
+        const diceEl = document.getElementById('dice');
+        const messageEl = document.getElementById('message');
+        const turnNameEl = document.getElementById('turn-name');
+
+        // ==================== CREATE BOARD ====================
+        function createBoard() {
+            boardEl.innerHTML = '';
+            
+            const numbersOrder = [];
+            
+            // Generate correct numbering (1 at bottom-left, 100 at top-left)
+            for (let rowFromTop = 0; rowFromTop < 10; rowFromTop++) {
+                const rowFromBottom = 9 - rowFromTop;
+                const startNum = rowFromBottom * 10 + 1;
+                
+                let rowNumbers = [];
+                
+                if (rowFromBottom % 2 === 0) {
+                    // Even row from bottom → Left to Right
+                    for (let j = 0; j < 10; j++) rowNumbers.push(startNum + j);
+                } else {
+                    // Odd row from bottom → Right to Left
+                    for (let j = 9; j >= 0; j--) rowNumbers.push(startNum + j);
+                }
+                
+                numbersOrder.push(...rowNumbers);
+            }
+
+            // Create 100 squares
+            numbersOrder.forEach((num, index) => {
+                const square = document.createElement('div');
+                square.className = 'square';
+                square.innerHTML = `
+                    <span class="number">${num}</span>
+                `;
+
+                // Add snake or ladder icon
+                if (snakesAndLadders[num]) {
+                    const target = snakesAndLadders[num];
+                    if (target > num) {
+                        square.innerHTML += `<span class="icon">🪜</span>`;
+                    } else {
+                        square.innerHTML += `<span class="icon">🐍</span>`;
+                    }
+                }
+                
+                boardEl.appendChild(square);
+            });
+        }
+
+        // ==================== TOKEN POSITION CALCULATION ====================
+        function getCoordinates(position) {
+            if (position < 1 || position > 100) return { left: '5%', top: '105%' };
+
+            const rowFromBottom = Math.floor((position - 1) / 10);
+            const posInRow = (position - 1) % 10;
+
+            let col = (rowFromBottom % 2 === 0) ? posInRow : 9 - posInRow;
+            const rowFromTop = 9 - rowFromBottom;
+
+            // Center token in square (42px token, 10% per square)
+            const left = (col * 10) + 3 + '%';
+            const top = (rowFromTop * 10) + 3 + '%';
+            
+            return { left, top };
+        }
+
+        // ==================== CREATE TOKENS ====================
+        function createTokens() {
+            // Remove old tokens if any
+            document.querySelectorAll('.token').forEach(t => t.remove());
+
+            players.forEach(player => {
+                const token = document.createElement('div');
+                token.className = 'token';
+                token.id = `token-${player.id}`;
+                token.style.backgroundColor = player.color;
+                token.innerHTML = player.emoji;
+                boardEl.appendChild(token);
+            });
+        }
+
+        // ==================== UPDATE TOKEN POSITION ====================
+        function updateToken(playerIndex) {
+            const player = players[playerIndex];
+            const token = document.getElementById(`token-${player.id}`);
+            
+            if (!token) return;
+
+            if (player.position === 0) {
+                token.style.display = 'none';
+            } else {
+                token.style.display = 'flex';
+                const coords = getCoordinates(player.position);
+                token.style.left = coords.left;
+                token.style.top = coords.top;
+            }
+
+            // Update position display
+            document.getElementById(`p${player.id}-pos`).textContent = player.position;
+        }
+
+        // ==================== ROLL DICE & MOVE ====================
+        async function rollDice() {
+            if (isGameOver) return;
+
+            rollBtn.disabled = true;
+
+            // Rolling animation
+            for (let i = 0; i < 12; i++) {
+                const randomFace = diceFaces[Math.floor(Math.random() * 6)];
+                diceEl.textContent = randomFace;
+                await new Promise(resolve => setTimeout(resolve, 60));
+            }
+
+            // Final roll
+            const roll = Math.floor(Math.random() * 6) + 1;
+            diceEl.textContent = diceFaces[roll - 1];
+
+            const currentPlayer = players[currentPlayerIndex];
+            let newPos = currentPlayer.position + roll;
+
+            // Move only if not overshooting 100
+            if (newPos <= 100) {
+                currentPlayer.position = newPos;
+
+                // Apply snake or ladder
+                if (snakesAndLadders[currentPlayer.position]) {
+                    currentPlayer.position = snakesAndLadders[currentPlayer.position];
+                }
+
+                updateToken(currentPlayerIndex);
+
+                // Check win
+                if (currentPlayer.position === 100) {
+                    isGameOver = true;
+                    messageEl.innerHTML = `
+                        <span style="color:#ffeb3b; font-size:2rem;">
+                            🎉 ${currentPlayer.name} WINS! 🎉
+                        </span>
+                    `;
+                    rollBtn.disabled = true;
+                    return;
+                }
+            }
+
+            // Switch turn
+            currentPlayerIndex = (currentPlayerIndex + 1) % 2;
+            
+            // Update UI
+            const nextPlayer = players[currentPlayerIndex];
+            turnNameEl.textContent = nextPlayer.name;
+            turnNameEl.style.color = nextPlayer.color;
+            
+            rollBtn.disabled = false;
+        }
+
+        // ==================== RESET GAME ====================
+        function resetGame() {
+            isGameOver = false;
+            currentPlayerIndex = 0;
+            messageEl.innerHTML = '';
+            
+            players[0].position = 0;
+            players[1].position = 0;
+            
+            createTokens();
+            updateToken(0);
+            updateToken(1);
+            
+            diceEl.textContent = diceFaces[0];
+            turnNameEl.textContent = 'PLAYER 1';
+            turnNameEl.style.color = '#e74c3c';
+            rollBtn.disabled = false;
+        }
+
+        // ==================== INITIALIZE GAME ====================
+        function initGame() {
+            createBoard();
+            createTokens();
+            updateToken(0);
+            updateToken(1);
+
+            // Event listeners
+            rollBtn.addEventListener('click', rollDice);
+            resetBtn.addEventListener('click', resetGame);
+
+            // Keyboard support
+            document.addEventListener('keydown', (e) => {
+                if (e.key === ' ' && !rollBtn.disabled && !isGameOver) {
+                    e.preventDefault();
+                    rollDice();
+                }
+            });
+
+            console.log('%c🐍 Snake & Ladder Game Ready! Enjoy!', 'color:#ffeb3b; font-size:16px;');
+        }
+
+        // Start the game
+        window.onload = initGame;
+    </script>
+</body>
+</html>
