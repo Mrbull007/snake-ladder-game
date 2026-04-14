@@ -57,5 +57,5 @@ Just open a Pull Request!
 
 ---
 
-Made with ❤️ by [Your GitHub Username]  
+Made with ❤️
 Star the repo if you like it! ⭐
